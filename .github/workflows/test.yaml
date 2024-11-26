@@ -1,0 +1,36 @@
+name: postilion-log-file-cleanup
+
+on:
+  schedule:
+    - cron: '5 * * * 2' # Schedule for dev
+    - cron: '15 * * * 2' # Schedule for prod
+    - cron: '25 * * * 2' # Schedule for qa
+    - cron: '35 * * * 2' # Schedule for uat
+jobs:
+  postilion-log-file-cleanup:
+    strategy:
+      matrix:
+        environment:
+          dev: self-hosted
+          prod: ubuntu-latest
+          qa: self-hosted
+          uat: self-hosted
+
+    runs-on: ${{ matrix.runner }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Load Environment Variables
+        run: |
+          echo "Loading environment variables for ${{ matrix.environment }}"
+          echo "Copying .env.${{ matrix.environment }} to .env"
+
+      - name: Execute Task
+        run: |
+          source .env
+          echo "Running cleanup_logs.sh on ${{ matrix.environment }}"
+          
+        env:
+          ENV: ${{ matrix.environment }}
